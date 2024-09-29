@@ -38,6 +38,15 @@ fi
 # 一時ファイルを作成
 TMP_FILE=$(mktemp)
 
+# .gitignoreのパターンを取得
+if [ -f .gitignore ]; then
+    IGNORE_PATTERN=$(echo -n ".git|" && grep -v '^#' .gitignore | sed 's|^/||' | paste -sd "|")
+else
+    IGNORE_PATTERN=$(echo ".git")
+fi
+echo "gitignoreのパターン: $IGNORE_PATTERN"
+
+
 # ディレクトリ構造を表示
 {
     echo "$CUSTOM_MESSAGE"
@@ -46,7 +55,7 @@ TMP_FILE=$(mktemp)
     echo
     echo '```'
     if command -v tree >/dev/null 2>&1; then
-        tree "$TARGET_DIR" | sed "s|^\.|$DIR_NAME|"
+        tree "$TARGET_DIR" -a -I "$IGNORE_PATTERN"
     else
         echo "treeコマンドが見つからないため、findコマンドを使用します。" >&2
         find "$TARGET_DIR" -print | sed "s|^\.|$DIR_NAME|"
